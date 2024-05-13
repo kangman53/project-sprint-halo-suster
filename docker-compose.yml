@@ -1,0 +1,50 @@
+version: '3.0'
+
+services:
+  ##### uncomment this for running from docker hub #####
+  # web:
+  #   container_name: halosus-web
+  #   image: rereasdev/halo-suster:latest
+  #   env_file:
+  #     - halo-suster.env
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - eniqilo
+
+  web:
+    build: .
+    container_name: halosus-web
+    # image: rereasdev/halo-suster:prefork
+    env_file:
+      - halo-suster.env
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/usr/src/app
+    command: air main.go -b 0.0.0.0
+    networks:
+      - eniqilo
+    # mem_limit: 2048m
+    # cpus: 0.25
+
+  db:
+    container_name: halosus-db
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=halosus
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=halosus-db
+      - POSTGRES_HOST=halosus-db
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db-data:/var/lib/postgres/data
+    networks:
+      - eniqilo
+    # mem_limit: 2048m
+    # cpus: 0.25
+
+networks:
+  eniqilo:
+    external: true

@@ -1,0 +1,10 @@
+*.env
+*.key
+*.pem
+pre_cmd.txt
+post_cmd.txt
+
+tmp
+build
+
+db-data
