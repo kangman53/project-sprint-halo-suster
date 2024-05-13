@@ -36,13 +36,17 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	// JWT middleware
 	// app.Use(helpers.CheckTokenHeader)
 	app.Use(helpers.GetTokenHandler())
-	userApi.Post("/nurse/register", func(c *fiber.Ctx) error {
+
+	// Nurse Management Middleware that requires "it" access
+	app.Use(func(c *fiber.Ctx) error {
 		fmt.Println(c.Locals("userRole"))
 		if userRole := c.Locals("userRole"); userRole != "it" {
 			return exc.ForbiddenException("Access Forbidden")
 		}
 		return c.Next()
 
-	}, userController.Register)
-
+	})
+	userApi.Get("/", userController.Get)
+	userApi.Post("/nurse/register", userController.Register)
+	userApi.Post("/nurse/:userId/access", userController.GiveAccess)
 }

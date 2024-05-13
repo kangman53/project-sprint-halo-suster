@@ -1,6 +1,7 @@
 package user_service
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -118,7 +119,7 @@ func (service *userServiceImpl) Login(ctx *fiber.Ctx, req user_entity.UserLoginR
 	}
 
 	if userLogin.Password == "" {
-		return user_entity.UserResponse{}, exc.BadRequestException("user is not having access")
+		return user_entity.UserResponse{}, exc.BadRequestException("User is not having access")
 	}
 
 	if _, err = helpers.ComparePassword(userLogin.Password, req.Password); err != nil {
@@ -143,4 +144,69 @@ func (service *userServiceImpl) Login(ctx *fiber.Ctx, req user_entity.UserLoginR
 			AccessToken: token,
 		},
 	}, nil
+}
+
+func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.NurseAccessRequest) (user_entity.UserResponse, error) {
+	// validate by rule we defined in _request_entity.go
+	if err := service.Validator.Struct(req); err != nil {
+		return user_entity.UserResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
+	}
+
+	userId := ctx.Params("userId")
+	hashPassword, err := helpers.HashPassword(req.Password)
+	if err != nil {
+		return user_entity.UserResponse{}, err
+	}
+	user := user_entity.User{
+		Id:       userId,
+		Password: hashPassword,
+	}
+
+	userContext := ctx.UserContext()
+	userLogin, err := service.UserRepository.GiveAccess(userContext, user)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return user_entity.UserResponse{}, exc.NotFoundException("User is not found")
+		}
+
+		return user_entity.UserResponse{}, err
+	}
+
+	token, err := service.AuthService.GenerateToken(userContext, userLogin.Id, userLogin.Role)
+	if err != nil {
+		return user_entity.UserResponse{}, err
+	}
+	nip, _ := strconv.Atoi(userLogin.Nip)
+
+	return user_entity.UserResponse{
+		Message: "Successfully create access for nurse",
+		Data: &user_entity.UserData{
+			Id:          userLogin.Id,
+			Name:        userLogin.Name,
+			Nip:         nip,
+			AccessToken: token,
+		},
+	}, nil
+
+}
+
+func (service *userServiceImpl) Search(ctx context.Context, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
+	if err := service.Validator.Struct(req); err != nil {
+		return user_entity.UserGetResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
+	}
+
+	customerSearch, err := service.UserRepository.Search(ctx, req)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return user_entity.UserGetResponse{}, exc.NotFoundException("Customer is not found")
+		}
+
+		return user_entity.UserGetResponse{}, err
+	}
+
+	return user_entity.UserGetResponse{
+		Message: "Successfully retrieved customers",
+		Data:    customerSearch,
+	}, nil
+
 }

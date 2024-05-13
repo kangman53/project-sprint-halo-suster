@@ -17,6 +17,7 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			password VARCHAR(255) NOT NULL,
             role VARCHAR(20) NOT NULL,
 			identity_card_scan_img TEXT,
+			is_deleted BOOL DEFAULT false,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 		CREATE INDEX IF NOT EXISTS users_id
