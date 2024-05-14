@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/kangman53/project-sprint-halo-suster/controller"
 	"github.com/kangman53/project-sprint-halo-suster/helpers"
 
@@ -43,7 +41,6 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	// app.Use(helpers.CheckTokenHeader)
 	app.Use(helpers.GetTokenHandler())
 	userApi.Post("/nurse/register", func(c *fiber.Ctx) error {
-		fmt.Println(c.Locals("userRole"))
 		if userRole := c.Locals("userRole"); userRole != "it" {
 			return exc.ForbiddenException("Access Forbidden")
 		}
