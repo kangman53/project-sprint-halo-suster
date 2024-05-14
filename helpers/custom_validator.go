@@ -58,6 +58,15 @@ func validateGender(fl validator.FieldLevel) bool {
 	return value == "male" || value == "female"
 }
 
+func validateISO8601DateTime(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	pattern := `^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(?:T|\\s)(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])?(Z)?$`
+	matched, _ := regexp.MatchString(pattern, value)
+
+	return matched
+}
+
 func RegisterCustomValidator(validator *validator.Validate) {
 	// validator.RegisterValidation() -> if you want to create new tags rule to be used on struct entity
 	// validator.RegisterStructValidation() -> if you want to create validator then access all fields to the struct entity
@@ -68,4 +77,5 @@ func RegisterCustomValidator(validator *validator.Validate) {
 	validator.RegisterValidation("nipIT", validateITNip)
 	validator.RegisterValidation("nipNurse", validateNurseNip)
 	validator.RegisterValidation("gender", validateGender)
+	validator.RegisterValidation("ISO8601DateTime", validateISO8601DateTime)
 }
