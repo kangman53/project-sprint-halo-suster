@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net/url"
+
 	"github.com/gofiber/fiber/v2"
 	medical_record_entity "github.com/kangman53/project-sprint-halo-suster/entity/medical_record"
 	exc "github.com/kangman53/project-sprint-halo-suster/exceptions"
@@ -56,4 +58,32 @@ func (controller *MedicalRecordController) CreateMedicalRecord(ctx *fiber.Ctx) e
 		return exc.Exception(ctx, err)
 	}
 	return ctx.Status(fiber.StatusCreated).JSON(resp)
+}
+
+func (controller *MedicalRecordController) SearchMedicalRecord(ctx *fiber.Ctx) error {
+	searchQuery := new(medical_record_entity.SearchMedicalRecordQuery)
+	searchQuery.Limit = 5
+	searchQuery.Offset = 0
+
+	if err := ctx.QueryParser(searchQuery); err != nil {
+		return exc.BadRequestException("Error when parsing request query")
+	}
+
+	rawQuery := ctx.Request().URI().QueryArgs()
+	queryValues, err := url.ParseQuery(rawQuery.String())
+	if err != nil {
+		return err
+	}
+
+	searchQuery.IdentityNumber = queryValues.Get("identityDetail.identityNumber")
+	searchQuery.CreatedById = queryValues.Get("createdBy.userId")
+	searchQuery.CreatedByNip = queryValues.Get("createdBy.nip")
+	searchQuery.CreatedAt = queryValues.Get("createdAt")
+
+	resp, err := controller.MedicalRecordService.SearchMedicalRecord(ctx.UserContext(), *searchQuery)
+	if err != nil {
+		return exc.Exception(ctx, err)
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(resp)
 }
