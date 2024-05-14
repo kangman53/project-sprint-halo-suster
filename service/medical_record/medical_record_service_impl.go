@@ -42,3 +42,20 @@ func (service *medicalRecordServiceImpl) CreatePatient(ctx context.Context, req 
 		Data:    &patientCreated,
 	}, nil
 }
+
+func (service *medicalRecordServiceImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchMRPatientQuery) (medical_record_entity.SearchMRPatientResponse, error) {
+	// validate by rule we defined in _request_entity.go
+	if err := service.Validator.Struct(searchQuery); err != nil {
+		return medical_record_entity.SearchMRPatientResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
+	}
+
+	patientSearched, err := service.MedicalRecordRepository.SearchPatient(ctx, searchQuery)
+	if err != nil {
+		return medical_record_entity.SearchMRPatientResponse{}, err
+	}
+
+	return medical_record_entity.SearchMRPatientResponse{
+		Message: "success",
+		Data:    patientSearched,
+	}, nil
+}

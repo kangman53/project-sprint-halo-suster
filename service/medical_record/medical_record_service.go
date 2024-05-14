@@ -8,4 +8,5 @@ import (
 
 type MedicalRecordService interface {
 	CreatePatient(ctx context.Context, req medical_record_entity.CreateMRPatientRequest) (medical_record_entity.CreateMRPatientResponse, error)
+	SearchPatient(ctx context.Context, query medical_record_entity.SearchMRPatientQuery) (medical_record_entity.SearchMRPatientResponse, error)
 }
