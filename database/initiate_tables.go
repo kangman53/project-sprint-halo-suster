@@ -26,12 +26,34 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 		CREATE INDEX IF NOT EXISTS users_name
 			ON users USING HASH(lower(name));
 		CREATE INDEX IF NOT EXISTS users_role
-				ON users (role);
+			ON users (role);
 		CREATE INDEX IF NOT EXISTS users_created_at_desc
-			ON users(created_at DESC);
+			ON users (created_at DESC);
 		CREATE INDEX IF NOT EXISTS users_created_at_asc
-			ON users(created_at ASC);
+			ON users (created_at ASC);
         `,
+		`
+		CREATE TABLE IF NOT EXISTS patients (
+			id VARCHAR(100) PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+			identity_number VARCHAR(20) UNIQUE,
+			phone_number VARCHAR (20) NOT NULL,
+            name VARCHAR(40) NOT NULL,
+			gender VARCHAR(10) NOT NULL,
+			birth_date TIMESTAMP NOT NULL,
+			identity_card_scan_img TEXT,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS patients_identity_number
+			ON patients (identity_number);
+		CREATE INDEX IF NOT EXISTS patients_name
+			ON patients USING HASH(lower(name));
+		CREATE INDEX IF NOT EXISTS patients_phone_number
+			ON patients (phone_number);
+		CREATE INDEX IF NOT EXISTS patients_created_at_desc
+			ON patients (created_at DESC);
+		CREATE INDEX IF NOT EXISTS patients_created_at_asc
+			ON patients (created_at ASC);
+		`,
 		// Add more table creation queries here if needed
 	}
 
