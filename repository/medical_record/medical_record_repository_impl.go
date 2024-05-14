@@ -21,14 +21,14 @@ func NewMedicalRecordRepository(dbPool *pgxpool.Pool) MedicalRecordRepository {
 	}
 }
 
-func (repostory *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.MRPatientData, error) {
+func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.MRPatientData, error) {
 	var identityNumber, patientId, createdAt string
 	identityNumber = strconv.Itoa(patient.IdentityNumber)
 
 	query := `INSERT INTO patients (identity_number, phone_number, name, gender, birth_date, identity_card_scan_img) 
 	VALUES ($1, $2, $3, $4, $5, $6) 
 	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at`
-	if err := repostory.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patientId, &createdAt); err != nil {
+	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patientId, &createdAt); err != nil {
 		return medical_record_entity.MRPatientData{}, err
 	}
 
@@ -88,4 +88,22 @@ func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context
 	}
 
 	return &patients, nil
+}
+
+func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.Context, req medical_record_entity.MedicalRecord) (medical_record_entity.MedicalRecordData, error) {
+	var identityNumber, medicalId, createdAt string
+	identityNumber = strconv.Itoa(req.IdentityNumber)
+
+	query := `INSERT INTO medical_records (patient_identity_number, symptoms, medicatons, created_by) 
+	SELECT 
+		$1, $2, $3, $4
+	WHERE EXISTS (
+		SELECT 1 FROM patients WHERE identity_number = $5
+	)
+	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at;`
+	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, req.Symptoms, req.Medications, req.CreateBy, identityNumber).Scan(&medicalId, &createdAt); err != nil {
+		return medical_record_entity.MedicalRecordData{}, err
+	}
+
+	return medical_record_entity.MedicalRecordData{Id: medicalId, CreateAt: createdAt}, nil
 }
