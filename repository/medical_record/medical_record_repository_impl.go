@@ -21,7 +21,7 @@ func NewMedicalRecordRepository(dbPool *pgxpool.Pool) MedicalRecordRepository {
 	}
 }
 
-func (repostory *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.CreateMRPatientRequest) (medical_record_entity.MRPatientData, error) {
+func (repostory *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.MRPatientData, error) {
 	var identityNumber, patientId, createdAt string
 	identityNumber = strconv.Itoa(patient.IdentityNumber)
 

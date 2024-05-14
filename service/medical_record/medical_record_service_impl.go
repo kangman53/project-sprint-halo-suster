@@ -29,7 +29,15 @@ func (service *medicalRecordServiceImpl) CreatePatient(ctx context.Context, req 
 		return medical_record_entity.CreateMRPatientResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
 	}
 
-	patientCreated, err := service.MedicalRecordRepository.CreatePatient(ctx, req)
+	patient := medical_record_entity.Patient{
+		IdentityNumber:      req.IdentityNumber,
+		PhoneNumber:         req.PhoneNumber,
+		Name:                req.Name,
+		BirthDate:           req.BirthDate,
+		Gender:              req.Gender,
+		IdentityCardScanImg: req.IdentityCardScanImg,
+	}
+	patientCreated, err := service.MedicalRecordRepository.CreatePatient(ctx, patient)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
 			return medical_record_entity.CreateMRPatientResponse{}, exc.ConflictException("Patient with this identity number already registered")
