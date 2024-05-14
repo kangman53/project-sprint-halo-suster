@@ -3,6 +3,8 @@ package helpers
 import (
 	"fmt"
 	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/go-playground/validator"
 )
@@ -59,12 +61,16 @@ func validateGender(fl validator.FieldLevel) bool {
 }
 
 func validateISO8601DateTime(fl validator.FieldLevel) bool {
-	value := fl.Field().String()
+	if value, ok := fl.Field().Interface().(string); ok {
+		_, err := time.Parse(time.RFC3339, value)
+		return err == nil
+	}
+	return false
+}
 
-	pattern := `^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])(?:T|\\s)(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])?(Z)?$`
-	matched, _ := regexp.MatchString(pattern, value)
-
-	return matched
+func validateInt16Length(fl validator.FieldLevel) bool {
+	str := strconv.Itoa(fl.Field().Interface().(int))
+	return len(str) == 16
 }
 
 func RegisterCustomValidator(validator *validator.Validate) {
@@ -78,4 +84,5 @@ func RegisterCustomValidator(validator *validator.Validate) {
 	validator.RegisterValidation("nipNurse", validateNurseNip)
 	validator.RegisterValidation("gender", validateGender)
 	validator.RegisterValidation("ISO8601DateTime", validateISO8601DateTime)
+	validator.RegisterValidation("int16length", validateInt16Length)
 }
