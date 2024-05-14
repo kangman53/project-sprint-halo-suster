@@ -23,3 +23,12 @@ type CreateMedicalRecordRequest struct {
 	Symptoms       string `json:"symptoms" validate:"required,min=1,max=2000"`
 	Medications    string `json:"medications" validate:"required,min=1,max=2000"`
 }
+
+type SearchMedicalRecordQuery struct {
+	IdentityNumber string `query:"identityDetail.identityNumber"`
+	CreatedById    string `query:"createdBy.userId"`
+	CreatedByNip   string `query:"createdBy.nip"`
+	CreatedAt      string `query:"createdAt"`
+	Limit          int    `query:"limit"`
+	Offset         int    `query:"offset"`
+}
