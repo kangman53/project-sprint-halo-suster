@@ -17,3 +17,9 @@ type SearchMRPatientQuery struct {
 	Limit          int
 	Offset         int
 }
+
+type CreateMedicalRecordRequest struct {
+	IdentityNumber int    `json:"identityNumber" validate:"required,int16length"`
+	Symptoms       string `json:"symptoms" validate:"required,min=1,max=2000"`
+	Medications    string `json:"medications" validate:"required,min=1,max=2000"`
+}

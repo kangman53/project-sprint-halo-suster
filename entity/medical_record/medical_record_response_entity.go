@@ -29,3 +29,13 @@ type MRPatientSearchData struct {
 	Gender         string `json:"gender"`
 	CreatedAt      string `json:"createdAt"`
 }
+
+type CreateMedicalRecordResponse struct {
+	Message string             `json:"message"`
+	Data    *MedicalRecordData `json:"data"`
+}
+
+type MedicalRecordData struct {
+	Id       string `json:"id"`
+	CreateAt string `json:"createdAt"`
+}

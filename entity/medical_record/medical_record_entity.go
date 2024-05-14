@@ -12,7 +12,8 @@ type Patient struct {
 
 type MedicalRecord struct {
 	Id             string
-	IdentityNumber string
+	IdentityNumber int
 	Symptoms       string
-	Name           string
+	Medications    string
+	CreateBy       string
 }
