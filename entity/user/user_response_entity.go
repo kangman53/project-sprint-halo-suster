@@ -9,5 +9,5 @@ type UserData struct {
 	Id          string `json:"userId"`
 	Name        string `json:"name"`
 	Nip         int    `json:"nip"`
-	AccessToken string `json:"accessToken"`
+	AccessToken string `json:"accessToken,omitempty"`
 }
