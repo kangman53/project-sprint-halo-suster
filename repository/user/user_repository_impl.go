@@ -45,6 +45,18 @@ func (repository *userRepositoryImpl) Login(ctx context.Context, user user_entit
 	return loggedInUser, nil
 }
 
+func (repository *userRepositoryImpl) Edit(ctx context.Context, user user_entity.User) error {
+	if err := repository.IsExist(ctx, user.Id, user.Role); err != nil {
+		return err
+	}
+	query := "UPDATE users SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4 RETURNING id"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Nip, user.Name, user.IdentityCardScanImg, user.Id).Scan(&user.Id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery user_entity.UserGetRequest) (*[]user_entity.UserResponseData, error) {
 	query := `SELECT id, name, cast(nip as BIGINT) nip, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') createdAt FROM users WHERE is_deleted = false`
 	var whereClause []string
