@@ -8,3 +8,12 @@ type CreateMRPatientRequest struct {
 	Gender              string `json:"gender" validate:"required,gender"`
 	IdentityCardScanImg string `json:"identityCardScanImg" validate:"required,validateUrl"`
 }
+
+type SearchMRPatientQuery struct {
+	IdentityNumber string
+	Name           string
+	PhoneNumber    string
+	CreatedAt      string
+	Limit          int
+	Offset         int
+}
