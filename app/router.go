@@ -28,7 +28,7 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	userController := controller.NewUserController(userService)
 
 	medicalRecordRepository := medical_record_repository.NewMedicalRecordRepository(dbPool)
-	medicalRecordService := medical_record_service.NewMedicalRecordService(medicalRecordRepository, validator)
+	medicalRecordService := medical_record_service.NewMedicalRecordService(medicalRecordRepository, authService, validator)
 	medicalRecordController := controller.NewMedicalRecordController(medicalRecordService)
 
 	// Users API
@@ -52,4 +52,5 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	medicalRecordApi := app.Group("/v1/medical")
 	medicalRecordApi.Post("/patient", medicalRecordController.CreatePatient)
 	medicalRecordApi.Get("/patient", medicalRecordController.SearchPatient)
+	medicalRecordApi.Post("/record", medicalRecordController.CreateMedicalRecord)
 }

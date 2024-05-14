@@ -45,3 +45,15 @@ func (controller *MedicalRecordController) SearchPatient(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(resp)
 }
+
+func (controller *MedicalRecordController) CreateMedicalRecord(ctx *fiber.Ctx) error {
+	medicalRecord := new(medical_record_entity.CreateMedicalRecordRequest)
+	if err := ctx.BodyParser(medicalRecord); err != nil {
+		return exc.BadRequestException("Failed to parse request body")
+	}
+	resp, err := controller.MedicalRecordService.CreateMedicalRecord(ctx, *medicalRecord)
+	if err != nil {
+		return exc.Exception(ctx, err)
+	}
+	return ctx.Status(fiber.StatusCreated).JSON(resp)
+}
