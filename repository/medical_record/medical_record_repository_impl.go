@@ -94,7 +94,7 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 	var identityNumber, medicalId, createdAt string
 	identityNumber = strconv.Itoa(req.IdentityNumber)
 
-	query := `INSERT INTO medical_records (patient_identity_number, symptoms, medicatons, created_by) 
+	query := `INSERT INTO medical_records (patient_identity_number, symptoms, medications, created_by) 
 	SELECT 
 		$1, $2, $3, $4
 	WHERE EXISTS (
@@ -106,4 +106,67 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 	}
 
 	return medical_record_entity.MedicalRecordData{Id: medicalId, CreateAt: createdAt}, nil
+}
+
+func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.Context, searchQuery medical_record_entity.SearchMedicalRecordQuery) (*[]medical_record_entity.SearchMedicalRecordData, error) {
+	query := `SELECT 
+	json_build_object('identityNumber', CAST(p.identity_number AS BIGINT), 'phoneNumber', p.phone_number, 'name', p.name, 'birthDate', to_char(p.birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'gender', p.gender, 'identityCardScanImg', p.identity_card_scan_img) identity_detail,
+	m.symptoms,
+	m.medications,
+	to_char(m.created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at,
+	json_build_object('nip', CAST(u.nip AS BIGINT), 'name', u.name, 'userId', u.id) created_by
+	FROM medical_records m
+		JOIN users u ON u.id = m.created_by
+		JOIN patients p ON p.identity_number = m.patient_identity_number
+	`
+
+	var whereClause []string
+	var searchParams []interface{}
+
+	if searchQuery.IdentityNumber != "" {
+		whereClause = append(whereClause, fmt.Sprintf("m.patient_identity_number = $%d", len(searchParams)+1))
+		searchParams = append(searchParams, searchQuery.IdentityNumber)
+	}
+	if searchQuery.CreatedById != "" {
+		whereClause = append(whereClause, fmt.Sprintf("m.created_by = $%d", len(searchParams)+1))
+		searchParams = append(searchParams, searchQuery.CreatedById)
+	}
+	if searchQuery.CreatedByNip != "" {
+		whereClause = append(whereClause, fmt.Sprintf("u.nip = $%d", len(searchParams)+1))
+		searchParams = append(searchParams, searchQuery.CreatedByNip)
+	}
+
+	if len(whereClause) > 0 {
+		query += " WHERE " + strings.Join(whereClause, " AND ")
+	}
+
+	var orderBy string
+	if strings.ToLower(searchQuery.CreatedAt) == "asc" {
+		orderBy = ` ORDER BY m.created_at ASC`
+	} else {
+		orderBy = ` ORDER BY m.created_at DESC`
+	}
+	query += orderBy
+
+	// handle limit or offset negative
+	if searchQuery.Limit < 0 {
+		searchQuery.Limit = 5
+	}
+	if searchQuery.Offset < 0 {
+		searchQuery.Offset = 0
+	}
+
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", searchQuery.Limit, searchQuery.Offset)
+	rows, err := repository.DBpool.Query(ctx, query, searchParams...)
+	if err != nil {
+		return &[]medical_record_entity.SearchMedicalRecordData{}, err
+	}
+	defer rows.Close()
+
+	medicalRecords, err := pgx.CollectRows(rows, pgx.RowToStructByName[medical_record_entity.SearchMedicalRecordData])
+	if err != nil {
+		return &[]medical_record_entity.SearchMedicalRecordData{}, err
+	}
+
+	return &medicalRecords, nil
 }
