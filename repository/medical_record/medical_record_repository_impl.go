@@ -21,7 +21,7 @@ func NewMedicalRecordRepository(dbPool *pgxpool.Pool) MedicalRecordRepository {
 	}
 }
 
-func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.MRPatientData, error) {
+func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.PatientData, error) {
 	var identityNumber, patientId, createdAt string
 	identityNumber = strconv.Itoa(patient.IdentityNumber)
 
@@ -29,13 +29,13 @@ func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context
 	VALUES ($1, $2, $3, $4, $5, $6) 
 	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at`
 	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patientId, &createdAt); err != nil {
-		return medical_record_entity.MRPatientData{}, err
+		return medical_record_entity.PatientData{}, err
 	}
 
-	return medical_record_entity.MRPatientData{Id: patientId, CreatedAt: createdAt}, nil
+	return medical_record_entity.PatientData{Id: patientId, CreatedAt: createdAt}, nil
 }
 
-func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchMRPatientQuery) (*[]medical_record_entity.MRPatientSearchData, error) {
+func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchPatientQuery) (*[]medical_record_entity.SearchPatientData, error) {
 	query := `SELECT CAST(identity_number AS BIGINT), phone_number, name, to_char(birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') birth_date, gender, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at
 	FROM patients`
 
@@ -78,13 +78,13 @@ func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", searchQuery.Limit, searchQuery.Offset)
 	rows, err := repository.DBpool.Query(ctx, query, searchParams...)
 	if err != nil {
-		return &[]medical_record_entity.MRPatientSearchData{}, err
+		return &[]medical_record_entity.SearchPatientData{}, err
 	}
 	defer rows.Close()
 
-	patients, err := pgx.CollectRows(rows, pgx.RowToStructByName[medical_record_entity.MRPatientSearchData])
+	patients, err := pgx.CollectRows(rows, pgx.RowToStructByName[medical_record_entity.SearchPatientData])
 	if err != nil {
-		return &[]medical_record_entity.MRPatientSearchData{}, err
+		return &[]medical_record_entity.SearchPatientData{}, err
 	}
 
 	return &patients, nil

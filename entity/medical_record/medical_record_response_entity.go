@@ -1,6 +1,6 @@
 package medical_record_entity
 
-type MRPatientData struct {
+type PatientData struct {
 	Id                  string `json:"id"`
 	IdentityNumber      int    `json:"identityNumber,omitempty"`
 	PhoneNumber         string `json:"PhoneNumber,omitempty"`
@@ -11,17 +11,17 @@ type MRPatientData struct {
 	CreatedAt           string `json:"createdAt"`
 }
 
-type CreateMRPatientResponse struct {
-	Message string         `json:"message"`
-	Data    *MRPatientData `json:"data"`
+type CreatePatientResponse struct {
+	Message string       `json:"message"`
+	Data    *PatientData `json:"data"`
 }
 
-type SearchMRPatientResponse struct {
-	Message string                 `json:"message"`
-	Data    *[]MRPatientSearchData `json:"data"`
+type SearchPatientResponse struct {
+	Message string               `json:"message"`
+	Data    *[]SearchPatientData `json:"data"`
 }
 
-type MRPatientSearchData struct {
+type SearchPatientData struct {
 	IdentityNumber int    `json:"identityNumber"`
 	PhoneNumber    string `json:"PhoneNumber"`
 	Name           string `json:"name"`

@@ -18,7 +18,7 @@ func NewMedicalRecordController(medicalRecordService medical_record_service.Medi
 }
 
 func (controller *MedicalRecordController) CreatePatient(ctx *fiber.Ctx) error {
-	patientReq := new(medical_record_entity.CreateMRPatientRequest)
+	patientReq := new(medical_record_entity.CreatePatientRequest)
 	if err := ctx.BodyParser(patientReq); err != nil {
 		return exc.BadRequestException("Failed to parse request body")
 	}
@@ -30,7 +30,7 @@ func (controller *MedicalRecordController) CreatePatient(ctx *fiber.Ctx) error {
 }
 
 func (controller *MedicalRecordController) SearchPatient(ctx *fiber.Ctx) error {
-	searchQuery := new(medical_record_entity.SearchMRPatientQuery)
+	searchQuery := new(medical_record_entity.SearchPatientQuery)
 	searchQuery.Limit = 5
 	searchQuery.Offset = 0
 

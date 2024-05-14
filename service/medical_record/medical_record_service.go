@@ -8,7 +8,7 @@ import (
 )
 
 type MedicalRecordService interface {
-	CreatePatient(ctx context.Context, req medical_record_entity.CreateMRPatientRequest) (medical_record_entity.CreateMRPatientResponse, error)
-	SearchPatient(ctx context.Context, query medical_record_entity.SearchMRPatientQuery) (medical_record_entity.SearchMRPatientResponse, error)
+	CreatePatient(ctx context.Context, req medical_record_entity.CreatePatientRequest) (medical_record_entity.CreatePatientResponse, error)
+	SearchPatient(ctx context.Context, query medical_record_entity.SearchPatientQuery) (medical_record_entity.SearchPatientResponse, error)
 	CreateMedicalRecord(ctx *fiber.Ctx, req medical_record_entity.CreateMedicalRecordRequest) (medical_record_entity.CreateMedicalRecordResponse, error)
 }
