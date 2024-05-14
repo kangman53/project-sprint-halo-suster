@@ -12,11 +12,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func FileUpload(file *multipart.FileHeader, fileName string) error {
+func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	// Get Buffer from file
 	buffer, err := file.Open()
 	if err != nil {
-		return exc.InternalServerException("Processing File Failed")
+		return "", exc.InternalServerException("Processing File Failed")
 	}
 	defer buffer.Close()
 
@@ -38,8 +38,7 @@ func FileUpload(file *multipart.FileHeader, fileName string) error {
 
 	newSession, err := session.NewSession(s3Config)
 	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
+		return "", exc.InternalServerException(err.Error())
 	}
 
 	s3Client := s3.New(newSession)
@@ -49,7 +48,7 @@ func FileUpload(file *multipart.FileHeader, fileName string) error {
 		Key:    aws.String(fileName),
 	})
 	if err != nil {
-		return exc.InternalServerException(err.Error())
+		return "", exc.InternalServerException(err.Error())
 	}
 
 	// CHECK AWS RESULT
@@ -65,5 +64,6 @@ func FileUpload(file *multipart.FileHeader, fileName string) error {
 	// if err != nil {
 	// 	return exc.InternalServerException(err.Error())
 	// }
-	return nil
+	url := fmt.Sprintf("https://%s.%s/%s", viper.GetString("S3_BUCKET_NAME"), endpointUrl, fileName)
+	return url, nil
 }

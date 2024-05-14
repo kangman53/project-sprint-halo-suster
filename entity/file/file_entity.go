@@ -1,8 +1,6 @@
 package file_entity
 
-import "mime/multipart"
-
-type UploadImage struct {
-	File *multipart.FileHeader
-	Size int64
+type UploadImageResponse struct {
+	Message string            `json:"message"`
+	Data    map[string]string `json:"data"`
 }
