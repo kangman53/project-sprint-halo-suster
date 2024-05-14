@@ -1,7 +1,6 @@
 package user_service
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -160,6 +159,7 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 	user := user_entity.User{
 		Id:       userId,
 		Password: hashPassword,
+		Role:     "nurse",
 	}
 
 	userContext := ctx.UserContext()
@@ -184,19 +184,39 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 
 }
 
-func (service *userServiceImpl) Search(ctx context.Context, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
+func (service *userServiceImpl) Search(ctx *fiber.Ctx, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
 	if err := service.Validator.Struct(req); err != nil {
 		return user_entity.UserGetResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
 	}
 
-	customerSearch, err := service.UserRepository.Search(ctx, req)
+	userSearch, err := service.UserRepository.Search(ctx.UserContext(), req)
 	if err != nil {
 		return user_entity.UserGetResponse{}, err
 	}
 
 	return user_entity.UserGetResponse{
-		Message: "Successfully retrieved customers",
-		Data:    customerSearch,
+		Message: "Successfully retrieved users",
+		Data:    userSearch,
 	}, nil
 
+}
+
+func (service *userServiceImpl) Delete(ctx *fiber.Ctx) (user_entity.UserResponse, error) {
+	userId := ctx.Params("userId")
+	deletedUser, err := service.UserRepository.Delete(ctx.Context(), userId)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return user_entity.UserResponse{}, exc.NotFoundException("User is not found")
+		}
+		return user_entity.UserResponse{}, err
+	}
+	nip, _ := strconv.Atoi(deletedUser.Nip)
+	return user_entity.UserResponse{
+		Message: "Successfully deleted user",
+		Data: &user_entity.UserData{
+			Id:   deletedUser.Id,
+			Name: deletedUser.Name,
+			Nip:  nip,
+		},
+	}, nil
 }

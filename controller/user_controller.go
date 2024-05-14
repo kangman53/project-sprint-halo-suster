@@ -53,7 +53,7 @@ func (controller UserController) Get(ctx *fiber.Ctx) error {
 		return exc.BadRequestException("Failed to parse request body")
 	}
 
-	resp, err := controller.UserService.Search(ctx.UserContext(), *userReq)
+	resp, err := controller.UserService.Search(ctx, *userReq)
 	if err != nil {
 		return exc.Exception(ctx, err)
 	}
@@ -71,5 +71,14 @@ func (controller UserController) GiveAccess(ctx *fiber.Ctx) error {
 		return exc.Exception(ctx, err)
 	}
 	return ctx.Status(fiber.StatusOK).JSON(resp)
+
+}
+
+func (controller UserController) Delete(ctx *fiber.Ctx) error {
+	resp, err := controller.UserService.Delete(ctx)
+	if err != nil {
+		return exc.Exception(ctx, err)
+	}
+	return ctx.Status(fiber.StatusCreated).JSON(resp)
 
 }
