@@ -101,3 +101,20 @@ func (service *medicalRecordServiceImpl) CreateMedicalRecord(ctx *fiber.Ctx, req
 		Data:    &medicalRecordCreated,
 	}, nil
 }
+
+func (service *medicalRecordServiceImpl) SearchMedicalRecord(ctx context.Context, searchQuery medical_record_entity.SearchMedicalRecordQuery) (medical_record_entity.SearchMedicalRecordResponse, error) {
+	// validate by rule we defined in _request_entity.go
+	if err := service.Validator.Struct(searchQuery); err != nil {
+		return medical_record_entity.SearchMedicalRecordResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
+	}
+
+	medicalRecordSearched, err := service.MedicalRecordRepository.SearchMedicalRecord(ctx, searchQuery)
+	if err != nil {
+		return medical_record_entity.SearchMedicalRecordResponse{}, err
+	}
+
+	return medical_record_entity.SearchMedicalRecordResponse{
+		Message: "success",
+		Data:    medicalRecordSearched,
+	}, nil
+}
