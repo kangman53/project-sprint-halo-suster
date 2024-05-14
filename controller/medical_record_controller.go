@@ -28,3 +28,20 @@ func (controller *MedicalRecordController) CreatePatient(ctx *fiber.Ctx) error {
 	}
 	return ctx.Status(fiber.StatusCreated).JSON(resp)
 }
+
+func (controller *MedicalRecordController) SearchPatient(ctx *fiber.Ctx) error {
+	searchQuery := new(medical_record_entity.SearchMRPatientQuery)
+	searchQuery.Limit = 5
+	searchQuery.Offset = 0
+
+	if err := ctx.QueryParser(searchQuery); err != nil {
+		return exc.BadRequestException("Error when parsing request query")
+	}
+
+	resp, err := controller.MedicalRecordService.SearchPatient(ctx.UserContext(), *searchQuery)
+	if err != nil {
+		return exc.Exception(ctx, err)
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(resp)
+}
