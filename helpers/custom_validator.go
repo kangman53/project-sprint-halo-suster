@@ -10,7 +10,7 @@ import (
 func validatePhoneNumber(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 
-	pattern := `^\+\d{1,}(?:-?\d{1,})+$`
+	pattern := `^\+62\d+$`
 	matched, _ := regexp.MatchString(pattern, value)
 	return matched
 }
@@ -53,6 +53,11 @@ func validateNurseNip(fl validator.FieldLevel) bool {
 	return validatNipByRole(value, "303")
 }
 
+func validateGender(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	return value == "male" || value == "female"
+}
+
 func RegisterCustomValidator(validator *validator.Validate) {
 	// validator.RegisterValidation() -> if you want to create new tags rule to be used on struct entity
 	// validator.RegisterStructValidation() -> if you want to create validator then access all fields to the struct entity
@@ -62,4 +67,5 @@ func RegisterCustomValidator(validator *validator.Validate) {
 	validator.RegisterValidation("validateUrl", validateUrl)
 	validator.RegisterValidation("nipIT", validateITNip)
 	validator.RegisterValidation("nipNurse", validateNurseNip)
+	validator.RegisterValidation("gender", validateGender)
 }
