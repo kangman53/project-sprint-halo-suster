@@ -45,6 +45,7 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	})
 	userApi.Get("/", userController.Get)
 	userApi.Post("/nurse/register", userController.Register)
+	userApi.Put("/nurse/:userId", userController.Edit)
 	userApi.Post("/nurse/:userId/access", userController.GiveAccess)
 	userApi.Delete("/nurse/:userId", userController.Delete)
 }
