@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	user_entity "github.com/kangman53/project-sprint-halo-suster/entity/user"
+	"github.com/kangman53/project-sprint-halo-suster/exceptions"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,7 +33,7 @@ func (repository *userRepositoryImpl) Register(ctx context.Context, user user_en
 }
 
 func (repository *userRepositoryImpl) Login(ctx context.Context, user user_entity.User) (user_entity.User, error) {
-	query := "SELECT id, name, password, role FROM users WHERE nip = $1 LIMIT 1"
+	query := "SELECT id, name, password, role FROM users WHERE nip = $1 AND is_deleted = false LIMIT 1"
 	row := repository.DBpool.QueryRow(ctx, query, user.Nip)
 
 	var loggedInUser user_entity.User
@@ -87,10 +88,42 @@ func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery us
 }
 
 func (repository *userRepositoryImpl) GiveAccess(ctx context.Context, user user_entity.User) (user_entity.User, error) {
-	query := "UPDATE users SET password = $1 WHERE id = $2 AND role = 'nurse' RETURNING name, nip, role"
-	if err := repository.DBpool.QueryRow(ctx, query, user.Password, user.Id).Scan(&user.Name, &user.Nip, &user.Role); err != nil {
+	if err := repository.IsExist(ctx, user.Id, user.Role); err != nil {
+		return user_entity.User{}, err
+	}
+	query := "UPDATE users SET password = $1 WHERE id = $2 RETURNING name, nip"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Password, user.Id).Scan(&user.Name, &user.Nip); err != nil {
 		return user_entity.User{}, err
 	}
 
 	return user, nil
+}
+
+func (repository *userRepositoryImpl) Delete(ctx context.Context, userId string) (user_entity.User, error) {
+	user := user_entity.User{
+		Id:   userId,
+		Role: "nurse",
+	}
+	if err := repository.IsExist(ctx, user.Id, user.Role); err != nil {
+		return user_entity.User{}, err
+	}
+	query := "UPDATE users SET is_deleted = true WHERE id = $1 RETURNING name, nip"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Id).Scan(&user.Name, &user.Nip); err != nil {
+		return user_entity.User{}, err
+	}
+
+	return user, nil
+}
+
+func (repository *userRepositoryImpl) IsExist(ctx context.Context, userId string, role string) error {
+	var roleDB string
+	query := "SELECT role FROM users WHERE id = $1 AND is_deleted = false"
+	if err := repository.DBpool.QueryRow(ctx, query, userId).Scan(&roleDB); err != nil {
+		return err
+	}
+	fmt.Println(role, roleDB)
+	if role != roleDB {
+		return exceptions.BadRequestException(fmt.Sprintf("Invalid nip for %s", role))
+	}
+	return nil
 }

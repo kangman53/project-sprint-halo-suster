@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/kangman53/project-sprint-halo-suster/controller"
 	"github.com/kangman53/project-sprint-halo-suster/helpers"
 
@@ -39,7 +37,6 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 
 	// Nurse Management Middleware that requires "it" access
 	app.Use(func(c *fiber.Ctx) error {
-		fmt.Println(c.Locals("userRole"))
 		if userRole := c.Locals("userRole"); userRole != "it" {
 			return exc.ForbiddenException("Access Forbidden")
 		}
@@ -49,4 +46,5 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	userApi.Get("/", userController.Get)
 	userApi.Post("/nurse/register", userController.Register)
 	userApi.Post("/nurse/:userId/access", userController.GiveAccess)
+	userApi.Delete("/nurse/:userId", userController.Delete)
 }
