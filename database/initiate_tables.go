@@ -66,14 +66,14 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			FOREIGN KEY (patient_identity_number) REFERENCES patients(identity_number) ON DELETE NO ACTION,
 			FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE NO ACTION
 		);
-		CREATE INDEX IF NOT EXISTS medical_record_patient_identity_number
-			ON medical_record (patient_identity_number);
-		CREATE INDEX IF NOT EXISTS medical_record_created_by
-			ON medical_record (created_by);
-		CREATE INDEX IF NOT EXISTS medical_record_created_at_desc
-			ON medical_record (created_at DESC);
-		CREATE INDEX IF NOT EXISTS medical_record_created_at_asc
-			ON medical_record (created_at ASC);
+		CREATE INDEX IF NOT EXISTS medical_records_patient_identity_number
+			ON medical_records (patient_identity_number);
+		CREATE INDEX IF NOT EXISTS medical_records_created_by
+			ON medical_records (created_by);
+		CREATE INDEX IF NOT EXISTS medical_records_created_at_desc
+			ON medical_records (created_at DESC);
+		CREATE INDEX IF NOT EXISTS medical_records_created_at_asc
+			ON medical_records (created_at ASC);
 		`,
 		// Add more table creation queries here if needed
 	}
