@@ -172,19 +172,13 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 		return user_entity.UserResponse{}, err
 	}
 
-	token, err := service.AuthService.GenerateToken(userContext, userLogin.Id, userLogin.Role)
-	if err != nil {
-		return user_entity.UserResponse{}, err
-	}
 	nip, _ := strconv.Atoi(userLogin.Nip)
-
 	return user_entity.UserResponse{
 		Message: "Successfully create access for nurse",
 		Data: &user_entity.UserData{
-			Id:          userLogin.Id,
-			Name:        userLogin.Name,
-			Nip:         nip,
-			AccessToken: token,
+			Id:   userLogin.Id,
+			Name: userLogin.Name,
+			Nip:  nip,
 		},
 	}, nil
 
@@ -197,10 +191,6 @@ func (service *userServiceImpl) Search(ctx context.Context, req user_entity.User
 
 	customerSearch, err := service.UserRepository.Search(ctx, req)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
-			return user_entity.UserGetResponse{}, exc.NotFoundException("Customer is not found")
-		}
-
 		return user_entity.UserGetResponse{}, err
 	}
 
