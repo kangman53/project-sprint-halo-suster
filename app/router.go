@@ -40,13 +40,6 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	// JWT middleware
 	// app.Use(helpers.CheckTokenHeader)
 	app.Use(helpers.GetTokenHandler())
-	userApi.Post("/nurse/register", func(c *fiber.Ctx) error {
-		if userRole := c.Locals("userRole"); userRole != "it" {
-			return exc.ForbiddenException("Access Forbidden")
-		}
-		return c.Next()
-
-	}, userController.Register)
 
 	// Medical Record API
 	medicalRecordApi := app.Group("/v1/medical")
@@ -54,4 +47,12 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	medicalRecordApi.Get("/patient", medicalRecordController.SearchPatient)
 	medicalRecordApi.Post("/record", medicalRecordController.CreateMedicalRecord)
 	medicalRecordApi.Get("/record", medicalRecordController.SearchMedicalRecord)
+
+	userApi.Post("/nurse/register", func(c *fiber.Ctx) error {
+		if userRole := c.Locals("userRole"); userRole != "it" {
+			return exc.ForbiddenException("Access Forbidden")
+		}
+		return c.Next()
+
+	}, userController.Register)
 }
