@@ -40,7 +40,7 @@ func (controller UserController) Edit(ctx *fiber.Ctx) error {
 	if err != nil {
 		return exc.Exception(ctx, err)
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(resp)
+	return ctx.Status(fiber.StatusOK).JSON(resp)
 
 }
 
@@ -92,6 +92,6 @@ func (controller UserController) Delete(ctx *fiber.Ctx) error {
 	if err != nil {
 		return exc.Exception(ctx, err)
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(resp)
+	return ctx.Status(fiber.StatusOK).JSON(resp)
 
 }

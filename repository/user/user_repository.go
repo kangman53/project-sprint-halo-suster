@@ -7,7 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	IsExist(ctx context.Context, userId string, role string) error
 	Register(ctx context.Context, req user_entity.User) (user_entity.UserData, error)
 	Edit(ctx context.Context, req user_entity.User) error
 	Login(ctx context.Context, req user_entity.User) (user_entity.User, error)

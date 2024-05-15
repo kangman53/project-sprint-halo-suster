@@ -110,6 +110,9 @@ func (service *userServiceImpl) Edit(ctx *fiber.Ctx, req user_entity.NurseEditRe
 		if strings.Contains(err.Error(), "duplicate key value") {
 			return user_entity.UserResponse{}, exc.ConflictException("User with this nip already registered")
 		}
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return user_entity.UserResponse{}, exc.NotFoundException("User is not found")
+		}
 		return user_entity.UserResponse{}, err
 	}
 	return user_entity.UserResponse{
