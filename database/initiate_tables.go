@@ -17,6 +17,7 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			password VARCHAR(255) NOT NULL,
             role VARCHAR(20) NOT NULL,
 			identity_card_scan_img TEXT,
+			is_deleted BOOL DEFAULT false,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 		CREATE INDEX IF NOT EXISTS users_id
@@ -65,6 +66,14 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			FOREIGN KEY (patient_identity_number) REFERENCES patients(identity_number) ON DELETE NO ACTION,
 			FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE NO ACTION
 		);
+		CREATE INDEX IF NOT EXISTS medical_record_patient_identity_number
+			ON medical_record (patient_identity_number);
+		CREATE INDEX IF NOT EXISTS medical_record_created_by
+			ON medical_record (created_by);
+		CREATE INDEX IF NOT EXISTS medical_record_created_at_desc
+			ON medical_record (created_at DESC);
+		CREATE INDEX IF NOT EXISTS medical_record_created_at_asc
+			ON medical_record (created_at ASC);
 		`,
 		// Add more table creation queries here if needed
 	}
