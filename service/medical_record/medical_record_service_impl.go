@@ -86,7 +86,7 @@ func (service *medicalRecordServiceImpl) CreateMedicalRecord(ctx *fiber.Ctx, req
 		IdentityNumber: req.IdentityNumber,
 		Symptoms:       req.Symptoms,
 		Medications:    req.Medications,
-		CreateBy:       userId,
+		CreatedBy:      userId,
 	}
 	medicalRecordCreated, err := service.MedicalRecordRepository.CreateMedicalRecord(ctx.UserContext(), medicalRecord)
 	if err != nil {

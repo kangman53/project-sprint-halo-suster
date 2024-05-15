@@ -21,18 +21,17 @@ func NewMedicalRecordRepository(dbPool *pgxpool.Pool) MedicalRecordRepository {
 	}
 }
 
-func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.PatientData, error) {
-	var identityNumber, patientId, createdAt string
-	identityNumber = strconv.Itoa(patient.IdentityNumber)
+func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context, patient medical_record_entity.Patient) (medical_record_entity.Patient, error) {
+	identityNumber := strconv.Itoa(patient.IdentityNumber)
 
 	query := `INSERT INTO patients (identity_number, phone_number, name, gender, birth_date, identity_card_scan_img) 
 	VALUES ($1, $2, $3, $4, $5, $6) 
 	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at`
-	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patientId, &createdAt); err != nil {
-		return medical_record_entity.PatientData{}, err
+	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patient.Id, &patient.CreatedAt); err != nil {
+		return medical_record_entity.Patient{}, err
 	}
 
-	return medical_record_entity.PatientData{Id: patientId, CreatedAt: createdAt}, nil
+	return patient, nil
 }
 
 func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchPatientQuery) (*[]medical_record_entity.SearchPatientData, error) {
@@ -90,9 +89,8 @@ func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context
 	return &patients, nil
 }
 
-func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.Context, req medical_record_entity.MedicalRecord) (medical_record_entity.MedicalRecordData, error) {
-	var identityNumber, medicalId, createdAt string
-	identityNumber = strconv.Itoa(req.IdentityNumber)
+func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.Context, medical medical_record_entity.MedicalRecord) (medical_record_entity.MedicalRecord, error) {
+	identityNumber := strconv.Itoa(medical.IdentityNumber)
 
 	query := `INSERT INTO medical_records (patient_identity_number, symptoms, medications, created_by) 
 	SELECT 
@@ -101,11 +99,11 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 		SELECT 1 FROM patients WHERE identity_number = $5
 	)
 	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at;`
-	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, req.Symptoms, req.Medications, req.CreateBy, identityNumber).Scan(&medicalId, &createdAt); err != nil {
-		return medical_record_entity.MedicalRecordData{}, err
+	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, medical.Symptoms, medical.Medications, medical.CreatedBy, identityNumber).Scan(&medical.Id, &medical.CreateAt); err != nil {
+		return medical_record_entity.MedicalRecord{}, err
 	}
 
-	return medical_record_entity.MedicalRecordData{Id: medicalId, CreateAt: createdAt}, nil
+	return medical, nil
 }
 
 func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.Context, searchQuery medical_record_entity.SearchMedicalRecordQuery) (*[]medical_record_entity.SearchMedicalRecordData, error) {

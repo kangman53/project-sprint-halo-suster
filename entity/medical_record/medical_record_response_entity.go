@@ -3,19 +3,8 @@ package medical_record_entity
 import user_entity "github.com/kangman53/project-sprint-halo-suster/entity/user"
 
 type CreatePatientResponse struct {
-	Message string       `json:"message"`
-	Data    *PatientData `json:"data"`
-}
-
-type PatientData struct {
-	Id                  string `json:"id,omitempty"`
-	IdentityNumber      int    `json:"identityNumber,omitempty"`
-	PhoneNumber         string `json:"PhoneNumber,omitempty"`
-	Name                string `json:"name,omitempty"`
-	BirthDate           string `json:"birthDate,omitempty"`
-	Gender              string `json:"gender,omitempty"`
-	IdentityCardScanImg string `json:"identityCardScanImg,omitempty"`
-	CreatedAt           string `json:"createdAt,omitempty"`
+	Message string   `json:"message"`
+	Data    *Patient `json:"data"`
 }
 
 type SearchPatientResponse struct {
@@ -33,16 +22,8 @@ type SearchPatientData struct {
 }
 
 type CreateMedicalRecordResponse struct {
-	Message string             `json:"message"`
-	Data    *MedicalRecordData `json:"data"`
-}
-
-type MedicalRecordData struct {
-	Id             string `json:"id,omitempty"`
-	IdentityNumber int    `json:"identityNumber,omitempty"`
-	Symptoms       string `json:"symptoms,omitempty"`
-	Medications    string `json:"medications,omitempty"`
-	CreateAt       string `json:"createdAt,omitempty"`
+	Message string         `json:"message"`
+	Data    *MedicalRecord `json:"data"`
 }
 
 type SearchMedicalRecordResponse struct {
@@ -51,7 +32,7 @@ type SearchMedicalRecordResponse struct {
 }
 
 type SearchMedicalRecordData struct {
-	IdentityDetail *PatientData          `json:"identityDetail"`
+	IdentityDetail *Patient              `json:"identityDetail"`
 	Symptoms       string                `json:"symptoms"`
 	Medications    string                `json:"medications"`
 	CreatedAt      string                `json:"createdAt"`
