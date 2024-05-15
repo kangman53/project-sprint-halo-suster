@@ -138,11 +138,9 @@ func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.C
 		query += " WHERE " + strings.Join(whereClause, " AND ")
 	}
 
-	var orderBy string
+	orderBy := ` ORDER BY m.created_at DESC`
 	if strings.ToLower(searchQuery.CreatedAt) == "asc" {
 		orderBy = ` ORDER BY m.created_at ASC`
-	} else {
-		orderBy = ` ORDER BY m.created_at DESC`
 	}
 	query += orderBy
 
