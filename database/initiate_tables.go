@@ -44,15 +44,15 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			identity_card_scan_img TEXT,
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
-		CREATE INDEX IF NOT EXISTS patients_identity_number
+		CREATE INDEX IF NOT EXISTS idx_patients_identity_number
 			ON patients (identity_number);
-		CREATE INDEX IF NOT EXISTS patients_name
+		CREATE INDEX IF NOT EXISTS idx_patients_name
 			ON patients USING HASH(lower(name));
-		CREATE INDEX IF NOT EXISTS patients_phone_number
+		CREATE INDEX IF NOT EXISTS idx_patients_phone_number
 			ON patients (phone_number);
-		CREATE INDEX IF NOT EXISTS patients_created_at_desc
+		CREATE INDEX IF NOT EXISTS idx_patients_created_at_desc
 			ON patients (created_at DESC);
-		CREATE INDEX IF NOT EXISTS patients_created_at_asc
+		CREATE INDEX IF NOT EXISTS idx_patients_created_at_asc
 			ON patients (created_at ASC);
 		`,
 		`
@@ -66,13 +66,13 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 			FOREIGN KEY (patient_identity_number) REFERENCES patients(identity_number) ON DELETE NO ACTION,
 			FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE NO ACTION
 		);
-		CREATE INDEX IF NOT EXISTS medical_records_patient_identity_number
+		CREATE INDEX IF NOT EXISTS idx_mr_patient_identity_number
 			ON medical_records (patient_identity_number);
-		CREATE INDEX IF NOT EXISTS medical_records_created_by
+		CREATE INDEX IF NOT EXISTS idx_mr_created_by
 			ON medical_records (created_by);
-		CREATE INDEX IF NOT EXISTS medical_records_created_at_desc
+		CREATE INDEX IF NOT EXISTS idx_mr_created_at_desc
 			ON medical_records (created_at DESC);
-		CREATE INDEX IF NOT EXISTS medical_records_created_at_asc
+		CREATE INDEX IF NOT EXISTS idx_mr_created_at_asc
 			ON medical_records (created_at ASC);
 		`,
 		// Add more table creation queries here if needed
