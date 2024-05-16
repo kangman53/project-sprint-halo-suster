@@ -17,18 +17,18 @@ WORKDIR /app
 COPY . .
 RUN go mod download
 
-# RUN apt-get update && apt-get install -y dumb-init
+RUN apt-get update && apt-get install -y dumb-init
 RUN CGO_ENABLED=0 GOOS=linux go build -o /halo-suster
 
 ## Deploy
 FROM gcr.io/distroless/base-debian11
 WORKDIR /app
 
-# COPY --from=build /usr/bin/dumb-init /usr/bin/dumb-init
+COPY --from=build /usr/bin/dumb-init /usr/bin/dumb-init
 COPY --from=build /halo-suster /app/halo-suster
 
 USER nonroot:nonroot
 
 EXPOSE 8080
-# ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["/app/halo-suster"]
