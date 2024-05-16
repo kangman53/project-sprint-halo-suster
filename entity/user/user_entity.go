@@ -8,3 +8,13 @@ type User struct {
 	Password            string
 	IdentityCardScanImg string
 }
+
+type UserRepository struct {
+	Id        string
+	Name      string
+	Nip       string
+	Role      string
+	Limit     int
+	Offset    int
+	CreatedAt string
+}
