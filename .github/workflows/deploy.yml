@@ -12,7 +12,7 @@ jobs:
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
-    # environment: production
+    environment: production
 
     steps:
       - name: Checkout
@@ -29,23 +29,24 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Automatic tagging of releases
-        id: increment-git-tag
-        # check https://semver.org/
-        # version format: v.{major}.{minor}.{patch}
-        # try -v patch|major|minor
-        run: |
-          bash ./git_update.sh -v patch
+      # - name: Automatic tagging of releases
+      #   id: increment-git-tag
+      #   # check https://semver.org/
+      #   # version format: v.{major}.{minor}.{patch}
+      #   # try -v patch|major|minor
+      #   run: |
+      #     bash ./git_update.sh -v patch
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+          IMAGE_TAG: latest
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
