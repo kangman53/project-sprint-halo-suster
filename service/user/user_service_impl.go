@@ -1,7 +1,6 @@
 package user_service
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -75,7 +74,7 @@ func (service *userServiceImpl) Register(ctx *fiber.Ctx, req user_entity.UserReg
 		return user_entity.UserResponse{}, err
 	}
 
-	token, err := service.AuthService.GenerateToken(userContext, userRegistered.Id, req.Role)
+	token, err := service.AuthService.GenerateToken(userContext, userRegistered.Id, role)
 	if err != nil {
 		return user_entity.UserResponse{}, err
 	}
@@ -87,6 +86,44 @@ func (service *userServiceImpl) Register(ctx *fiber.Ctx, req user_entity.UserReg
 		Message: "User registered",
 		Data:    &userRegistered,
 	}, nil
+}
+
+func (service *userServiceImpl) Edit(ctx *fiber.Ctx, req user_entity.NurseEditRequest) (user_entity.UserResponse, error) {
+	// validate by rule we defined in _request_entity.go
+	if err := service.Validator.Struct(req); err != nil {
+		return user_entity.UserResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
+	}
+	user := user_entity.User{
+		Id:                  ctx.Params("userId"),
+		Name:                req.Name,
+		Nip:                 strconv.Itoa(req.Nip),
+		Role:                "nurse",
+		IdentityCardScanImg: req.IdentityCardScanImg,
+	}
+
+	if err := service.Validator.Var(user.Nip, "nipNurse"); err != nil {
+		return user_entity.UserResponse{}, exc.BadRequestException("Invalid NIP for nurse")
+	}
+
+	userContext := ctx.UserContext()
+	if err := service.UserRepository.Edit(userContext, user); err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			return user_entity.UserResponse{}, exc.ConflictException("User with this nip already registered")
+		}
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return user_entity.UserResponse{}, exc.NotFoundException("User is not found")
+		}
+		return user_entity.UserResponse{}, err
+	}
+	return user_entity.UserResponse{
+		Message: "Successfully edited nurse",
+		Data: &user_entity.UserData{
+			Id:   user.Id,
+			Name: req.Name,
+			Nip:  req.Nip,
+		},
+	}, nil
+
 }
 
 func (service *userServiceImpl) Login(ctx *fiber.Ctx, req user_entity.UserLoginRequest) (user_entity.UserResponse, error) {
@@ -160,6 +197,7 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 	user := user_entity.User{
 		Id:       userId,
 		Password: hashPassword,
+		Role:     "nurse",
 	}
 
 	userContext := ctx.UserContext()
@@ -184,19 +222,39 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 
 }
 
-func (service *userServiceImpl) Search(ctx context.Context, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
+func (service *userServiceImpl) Search(ctx *fiber.Ctx, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
 	if err := service.Validator.Struct(req); err != nil {
 		return user_entity.UserGetResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
 	}
 
-	customerSearch, err := service.UserRepository.Search(ctx, req)
+	userSearch, err := service.UserRepository.Search(ctx.UserContext(), req)
 	if err != nil {
 		return user_entity.UserGetResponse{}, err
 	}
 
 	return user_entity.UserGetResponse{
-		Message: "Successfully retrieved customers",
-		Data:    customerSearch,
+		Message: "Successfully retrieved users",
+		Data:    userSearch,
 	}, nil
 
+}
+
+func (service *userServiceImpl) Delete(ctx *fiber.Ctx) (user_entity.UserResponse, error) {
+	userId := ctx.Params("userId")
+	deletedUser, err := service.UserRepository.Delete(ctx.Context(), userId)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return user_entity.UserResponse{}, exc.NotFoundException("User is not found")
+		}
+		return user_entity.UserResponse{}, err
+	}
+	nip, _ := strconv.Atoi(deletedUser.Nip)
+	return user_entity.UserResponse{
+		Message: "Successfully deleted user",
+		Data: &user_entity.UserData{
+			Id:   deletedUser.Id,
+			Name: deletedUser.Name,
+			Nip:  nip,
+		},
+	}, nil
 }

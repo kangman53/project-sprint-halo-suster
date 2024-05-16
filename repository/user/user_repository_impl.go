@@ -32,7 +32,7 @@ func (repository *userRepositoryImpl) Register(ctx context.Context, user user_en
 }
 
 func (repository *userRepositoryImpl) Login(ctx context.Context, user user_entity.User) (user_entity.User, error) {
-	query := "SELECT id, name, password, role FROM users WHERE nip = $1 LIMIT 1"
+	query := "SELECT id, name, password, role FROM users WHERE nip = $1 AND is_deleted = false LIMIT 1"
 	row := repository.DBpool.QueryRow(ctx, query, user.Nip)
 
 	var loggedInUser user_entity.User
@@ -42,6 +42,15 @@ func (repository *userRepositoryImpl) Login(ctx context.Context, user user_entit
 	}
 
 	return loggedInUser, nil
+}
+
+func (repository *userRepositoryImpl) Edit(ctx context.Context, user user_entity.User) error {
+	query := "UPDATE users SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4 AND role = 'nurse' RETURNING id"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Nip, user.Name, user.IdentityCardScanImg, user.Id).Scan(&user.Id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery user_entity.UserGetRequest) (*[]user_entity.UserResponseData, error) {
@@ -87,8 +96,21 @@ func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery us
 }
 
 func (repository *userRepositoryImpl) GiveAccess(ctx context.Context, user user_entity.User) (user_entity.User, error) {
-	query := "UPDATE users SET password = $1 WHERE id = $2 AND role = 'nurse' RETURNING name, nip, role"
-	if err := repository.DBpool.QueryRow(ctx, query, user.Password, user.Id).Scan(&user.Name, &user.Nip, &user.Role); err != nil {
+	query := "UPDATE users SET password = $1 WHERE id = $2 AND role = 'nurse' RETURNING name, nip"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Password, user.Id).Scan(&user.Name, &user.Nip); err != nil {
+		return user_entity.User{}, err
+	}
+
+	return user, nil
+}
+
+func (repository *userRepositoryImpl) Delete(ctx context.Context, userId string) (user_entity.User, error) {
+	user := user_entity.User{
+		Id:   userId,
+		Role: "nurse",
+	}
+	query := "UPDATE users SET is_deleted = true WHERE id = $1 AND role = 'nurse' RETURNING name, nip"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Id).Scan(&user.Name, &user.Nip); err != nil {
 		return user_entity.User{}, err
 	}
 

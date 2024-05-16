@@ -1,8 +1,6 @@
 package helpers
 
 import (
-	"fmt"
-
 	"github.com/golang-jwt/jwt/v5"
 	exc "github.com/kangman53/project-sprint-halo-suster/exceptions"
 
@@ -21,7 +19,6 @@ func GetTokenHandler() fiber.Handler {
 		SuccessHandler: func(c *fiber.Ctx) error {
 			auth := c.Locals(JwtContextKey).(*jwt.Token)
 			claims := auth.Claims.(jwt.MapClaims)
-			fmt.Println(claims)
 			c.Locals("userId", claims["user_id"].(string))
 			c.Locals("userRole", claims["role"].(string))
 			return c.Next()
