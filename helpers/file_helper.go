@@ -20,7 +20,7 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	}
 	defer buffer.Close()
 
-	endpointUrl := viper.GetString("S3_BUCKET_URL")
+	endpointUrl := viper.GetString("AWS_S3_BUCKET_URL")
 	if endpointUrl == "" {
 		endpointUrl = "s3.ap-southeast-1.amazonaws.com"
 	}
@@ -29,9 +29,9 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	// fmt.Println(fileName)
 	// Configure to use MinIO Server
 	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(viper.GetString("S3_ID"), viper.GetString("S3_SECRET_KEY"), ""),
+		Credentials:      credentials.NewStaticCredentials(viper.GetString("AWS_ACCES_KEY_ID"), viper.GetString("AWS_SECRET_ACCESS_KEY"), ""),
 		Endpoint:         aws.String(endpointUrl),
-		Region:           aws.String(viper.GetString("S3_REGION")),
+		Region:           aws.String(viper.GetString("AWS_REGION")),
 		DisableSSL:       aws.Bool(true),
 		S3ForcePathStyle: aws.Bool(true),
 	}
@@ -44,7 +44,8 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	s3Client := s3.New(newSession)
 	_, err = s3Client.PutObject(&s3.PutObjectInput{
 		Body:   buffer,
-		Bucket: aws.String(viper.GetString("S3_BUCKET_NAME")),
+		Bucket: aws.String(viper.GetString("AWS_S3_BUCKET_NAME")),
+		ACL:    aws.String("public-read"),
 		Key:    aws.String(fileName),
 	})
 	if err != nil {
@@ -53,7 +54,7 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 
 	// CHECK AWS RESULT
 	// output, err := s3Client.ListObjectsV2(&s3.ListObjectsV2Input{
-	// 	Bucket: aws.String(viper.GetString("S3_BUCKET_NAME")),
+	// 	Bucket: aws.String(viper.GetString("AWS_S3_BUCKET_NAME")),
 	// })
 
 	// for _, object := range output.Contents {
@@ -64,6 +65,6 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	// if err != nil {
 	// 	return exc.InternalServerException(err.Error())
 	// }
-	url := fmt.Sprintf("https://%s.%s/%s", viper.GetString("S3_BUCKET_NAME"), endpointUrl, fileName)
+	url := fmt.Sprintf("https://%s.%s/%s", viper.GetString("AWS_S3_BUCKET_NAME"), endpointUrl, fileName)
 	return url, nil
 }
