@@ -29,11 +29,19 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Automatic tagging of releases
+        id: increment-git-tag
+        # check https://semver.org/
+        # version format: v.{major}.{minor}.{patch}
+        # try -v patch|major|minor
+        run: |
+          bash ./git_update.sh -v patch
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: latest
+          IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
