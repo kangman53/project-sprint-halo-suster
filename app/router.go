@@ -8,6 +8,7 @@ import (
 	medical_record_repository "github.com/kangman53/project-sprint-halo-suster/repository/medical_record"
 	user_repository "github.com/kangman53/project-sprint-halo-suster/repository/user"
 	auth_service "github.com/kangman53/project-sprint-halo-suster/service/auth"
+	file_service "github.com/kangman53/project-sprint-halo-suster/service/file"
 	medical_record_service "github.com/kangman53/project-sprint-halo-suster/service/medical_record"
 	user_service "github.com/kangman53/project-sprint-halo-suster/service/user"
 
@@ -30,6 +31,8 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	medicalRecordRepository := medical_record_repository.NewMedicalRecordRepository(dbPool)
 	medicalRecordService := medical_record_service.NewMedicalRecordService(medicalRecordRepository, authService, validator)
 	medicalRecordController := controller.NewMedicalRecordController(medicalRecordService)
+	fileService := file_service.NewFileService()
+	fileController := controller.NewFileController(fileService)
 
 	// Users API
 	userApi := app.Group("/v1/user")
@@ -47,12 +50,19 @@ func RegisterBluePrint(app *fiber.App, dbPool *pgxpool.Pool) {
 	medicalRecordApi.Get("/patient", medicalRecordController.SearchPatient)
 	medicalRecordApi.Post("/record", medicalRecordController.CreateMedicalRecord)
 	medicalRecordApi.Get("/record", medicalRecordController.SearchMedicalRecord)
+	app.Post("/v1/image", fileController.Upload)
 
-	userApi.Post("/nurse/register", func(c *fiber.Ctx) error {
+	// Nurse Management Middleware that requires "it" access
+	app.Use(func(c *fiber.Ctx) error {
 		if userRole := c.Locals("userRole"); userRole != "it" {
 			return exc.ForbiddenException("Access Forbidden")
 		}
 		return c.Next()
 
-	}, userController.Register)
+	})
+	userApi.Get("/", userController.Get)
+	userApi.Post("/nurse/register", userController.Register)
+	userApi.Put("/nurse/:userId", userController.Edit)
+	userApi.Post("/nurse/:userId/access", userController.GiveAccess)
+	userApi.Delete("/nurse/:userId", userController.Delete)
 }

@@ -1,7 +1,6 @@
 # Project Sprint Halo Suster App
 
-EniQilo is a cashier application for user to serve customer purchases.
-
+HaloSus is a backend that nurses can use to record patient medical records.
 # How to run local (dev purposes)
 
 - Create file `halo-suster.env`
