@@ -3,6 +3,8 @@ package helpers
 import (
 	"fmt"
 	"regexp"
+	"strconv"
+	"time"
 
 	"github.com/go-playground/validator"
 )
@@ -10,7 +12,7 @@ import (
 func validatePhoneNumber(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 
-	pattern := `^\+\d{1,}(?:-?\d{1,})+$`
+	pattern := `^\+62\d+$`
 	matched, _ := regexp.MatchString(pattern, value)
 	return matched
 }
@@ -53,6 +55,24 @@ func validateNurseNip(fl validator.FieldLevel) bool {
 	return validatNipByRole(value, "303")
 }
 
+func validateGender(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	return value == "male" || value == "female"
+}
+
+func validateISO8601DateTime(fl validator.FieldLevel) bool {
+	if value, ok := fl.Field().Interface().(string); ok {
+		_, err := time.Parse(time.RFC3339, value)
+		return err == nil
+	}
+	return false
+}
+
+func validateInt16Length(fl validator.FieldLevel) bool {
+	str := strconv.Itoa(fl.Field().Interface().(int))
+	return len(str) == 16
+}
+
 func RegisterCustomValidator(validator *validator.Validate) {
 	// validator.RegisterValidation() -> if you want to create new tags rule to be used on struct entity
 	// validator.RegisterStructValidation() -> if you want to create validator then access all fields to the struct entity
@@ -62,4 +82,7 @@ func RegisterCustomValidator(validator *validator.Validate) {
 	validator.RegisterValidation("validateUrl", validateUrl)
 	validator.RegisterValidation("nipIT", validateITNip)
 	validator.RegisterValidation("nipNurse", validateNurseNip)
+	validator.RegisterValidation("gender", validateGender)
+	validator.RegisterValidation("ISO8601DateTime", validateISO8601DateTime)
+	validator.RegisterValidation("int16length", validateInt16Length)
 }

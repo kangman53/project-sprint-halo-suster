@@ -35,6 +35,48 @@ func InitiateTables(dbPool *pgxpool.Pool) error {
 		CREATE INDEX IF NOT EXISTS index_users_created_at_asc
 			ON users(created_at ASC);
         `,
+		`
+		CREATE TABLE IF NOT EXISTS patients (
+			id VARCHAR(100) PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+			identity_number VARCHAR(20) UNIQUE,
+			phone_number VARCHAR (20) NOT NULL,
+            name VARCHAR(40) NOT NULL,
+			gender VARCHAR(10) NOT NULL,
+			birth_date TIMESTAMP NOT NULL,
+			identity_card_scan_img TEXT,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_patients_identity_number
+			ON patients (identity_number);
+		CREATE INDEX IF NOT EXISTS idx_patients_name
+			ON patients USING HASH(lower(name));
+		CREATE INDEX IF NOT EXISTS idx_patients_phone_number
+			ON patients (phone_number);
+		CREATE INDEX IF NOT EXISTS idx_patients_created_at_desc
+			ON patients (created_at DESC);
+		CREATE INDEX IF NOT EXISTS idx_patients_created_at_asc
+			ON patients (created_at ASC);
+		`,
+		`
+		CREATE TABLE IF NOT EXISTS medical_records (
+			id VARCHAR(100) PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+			patient_identity_number VARCHAR(20) NOT NULL,
+			symptoms TEXT NOT NULL,
+            medications TEXT NOT NULL,
+			created_by VARCHAR(100) NOT NULL,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (patient_identity_number) REFERENCES patients(identity_number) ON DELETE NO ACTION,
+			FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE NO ACTION
+		);
+		CREATE INDEX IF NOT EXISTS idx_mr_patient_identity_number
+			ON medical_records (patient_identity_number);
+		CREATE INDEX IF NOT EXISTS idx_mr_created_by
+			ON medical_records (created_by);
+		CREATE INDEX IF NOT EXISTS idx_mr_created_at_desc
+			ON medical_records (created_at DESC);
+		CREATE INDEX IF NOT EXISTS idx_mr_created_at_asc
+			ON medical_records (created_at ASC);
+		`,
 		// Add more table creation queries here if needed
 	}
 
