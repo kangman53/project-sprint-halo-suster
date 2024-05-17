@@ -29,7 +29,7 @@ func FileUpload(file *multipart.FileHeader, fileName string) (string, error) {
 	// fmt.Println(fileName)
 	// Configure to use MinIO Server
 	s3Config := &aws.Config{
-		Credentials:      credentials.NewStaticCredentials(viper.GetString("AWS_ACCES_KEY_ID"), viper.GetString("AWS_SECRET_ACCESS_KEY"), ""),
+		Credentials:      credentials.NewStaticCredentials(viper.GetString("AWS_ACCESS_KEY_ID"), viper.GetString("AWS_SECRET_ACCESS_KEY"), ""),
 		Endpoint:         aws.String(endpointUrl),
 		Region:           aws.String(viper.GetString("AWS_REGION")),
 		DisableSSL:       aws.Bool(true),
