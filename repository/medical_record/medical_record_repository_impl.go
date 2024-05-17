@@ -41,9 +41,9 @@ func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context
 	var whereClause []string
 	var searchParams []interface{}
 
-	if searchQuery.IdentityNumber > 0 {
+	if identityNumber, _ := strconv.Atoi(searchQuery.IdentityNumber); identityNumber > 0 {
 		whereClause = append(whereClause, fmt.Sprintf("identity_number = $%d", len(searchParams)+1))
-		searchParams = append(searchParams, searchQuery.IdentityNumber)
+		searchParams = append(searchParams, identityNumber)
 	}
 	if searchQuery.Name != "" {
 		whereClause = append(whereClause, fmt.Sprintf("name ~* $%d", len(searchParams)+1))
@@ -121,9 +121,9 @@ func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.C
 	var whereClause []string
 	var searchParams []interface{}
 
-	if searchQuery.IdentityDetail.IdentityNumber > 0 {
+	if identityNumber, _ := strconv.Atoi(searchQuery.IdentityDetail.IdentityNumber); identityNumber > 0 {
 		whereClause = append(whereClause, fmt.Sprintf("m.patient_identity_number = $%d", len(searchParams)+1))
-		searchParams = append(searchParams, searchQuery.IdentityDetail.IdentityNumber)
+		searchParams = append(searchParams, identityNumber)
 	}
 	if searchQuery.CreatedBy.UserId != "" {
 		whereClause = append(whereClause, fmt.Sprintf("m.created_by = $%d", len(searchParams)+1))

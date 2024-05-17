@@ -223,10 +223,6 @@ func (service *userServiceImpl) GiveAccess(ctx *fiber.Ctx, req user_entity.Nurse
 }
 
 func (service *userServiceImpl) Search(ctx *fiber.Ctx, req user_entity.UserGetRequest) (user_entity.UserGetResponse, error) {
-	if err := service.Validator.Struct(req); err != nil {
-		return user_entity.UserGetResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
-	}
-
 	userSearch, err := service.UserRepository.Search(ctx.UserContext(), req)
 	if err != nil {
 		return user_entity.UserGetResponse{}, err

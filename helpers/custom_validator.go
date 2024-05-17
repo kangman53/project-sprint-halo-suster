@@ -38,7 +38,7 @@ func validateProductCategory(fl validator.FieldLevel) bool {
 
 func validatNipByRole(value string, code string) bool {
 
-	pattern := fmt.Sprintf(`^%s[12]20(?:0[0-9]|1[0-9]|2[0-4])(0[1-9]|1[0-2])([0-9]{3})$`, code)
+	pattern := fmt.Sprintf(`^%s[12]20(?:0[0-9]|1[0-9]|2[0-4])(0[1-9]|1[0-2])([0-9]{3,5})$`, code)
 	matched, _ := regexp.MatchString(pattern, value)
 	return matched
 }

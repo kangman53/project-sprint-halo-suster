@@ -3,6 +3,7 @@ package user_repository
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	user_entity "github.com/kangman53/project-sprint-halo-suster/entity/user"
@@ -61,6 +62,10 @@ func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery us
 	if searchQuery.Id != "" {
 		whereClause = append(whereClause, fmt.Sprintf("id = $%d", len(searchParams)+1))
 		searchParams = append(searchParams, searchQuery.Id)
+	}
+	if nip, _ := strconv.Atoi(searchQuery.Nip); nip > 0 {
+		whereClause = append(whereClause, fmt.Sprintf("nip ~* $%d", len(searchParams)+1))
+		searchParams = append(searchParams, searchQuery.Nip)
 	}
 	if searchQuery.Name != "" {
 		whereClause = append(whereClause, fmt.Sprintf("name ~* $%d", len(searchParams)+1))

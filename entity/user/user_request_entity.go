@@ -25,7 +25,7 @@ type NurseAccessRequest struct {
 type UserGetRequest struct {
 	Id        string `json:"userId"`
 	Name      string `json:"name"`
-	Nip       int    `json:"nip"`
+	Nip       string `json:"nip"`
 	Role      string `json:"role"`
 	Limit     int    `json:"limit"`
 	Offset    int    `json:"offset"`

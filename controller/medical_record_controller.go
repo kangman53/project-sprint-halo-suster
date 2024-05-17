@@ -60,7 +60,7 @@ func (controller *MedicalRecordController) CreateMedicalRecord(ctx *fiber.Ctx) e
 
 func (controller *MedicalRecordController) SearchMedicalRecord(ctx *fiber.Ctx) error {
 	searchQuery := new(medical_record_entity.SearchMedicalRecordQuery)
-	searchQuery.IdentityDetail = new(medical_record_entity.IdentityDetails)
+	searchQuery.IdentityDetail = new(medical_record_entity.IdentityDetail)
 	searchQuery.CreatedBy = new(medical_record_entity.CreatedBy)
 	searchQuery.Limit = 5
 	searchQuery.Offset = 0
@@ -68,6 +68,7 @@ func (controller *MedicalRecordController) SearchMedicalRecord(ctx *fiber.Ctx) e
 	if err := ctx.QueryParser(searchQuery); err != nil {
 		return exc.BadRequestException("Error when parsing request query")
 	}
+
 	resp, err := controller.MedicalRecordService.SearchMedicalRecord(ctx.UserContext(), *searchQuery)
 	if err != nil {
 		return exc.Exception(ctx, err)
