@@ -35,13 +35,13 @@ func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context
 }
 
 func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchPatientQuery) (*[]medical_record_entity.SearchPatientData, error) {
-	query := `SELECT CAST(identity_number AS BIGINT), phone_number, name, to_char(birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') birth_date, gender, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at
+	query := `SELECT identity_number, phone_number, name, to_char(birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') birth_date, gender, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at
 	FROM patients`
 
 	var whereClause []string
 	var searchParams []interface{}
 
-	if searchQuery.IdentityNumber != "" {
+	if searchQuery.IdentityNumber > 0 {
 		whereClause = append(whereClause, fmt.Sprintf("identity_number = $%d", len(searchParams)+1))
 		searchParams = append(searchParams, searchQuery.IdentityNumber)
 	}
@@ -108,7 +108,7 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 
 func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.Context, searchQuery medical_record_entity.SearchMedicalRecordQuery) (*[]medical_record_entity.SearchMedicalRecordData, error) {
 	query := `SELECT 
-	json_build_object('identityNumber', CAST(p.identity_number AS BIGINT), 'phoneNumber', p.phone_number, 'name', p.name, 'birthDate', to_char(p.birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'gender', p.gender, 'identityCardScanImg', p.identity_card_scan_img) identity_detail,
+	json_build_object('identityNumber', p.identity_number, 'phoneNumber', p.phone_number, 'name', p.name, 'birthDate', to_char(p.birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'gender', p.gender, 'identityCardScanImg', p.identity_card_scan_img) identity_detail,
 	m.symptoms,
 	m.medications,
 	to_char(m.created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at,
@@ -121,17 +121,17 @@ func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.C
 	var whereClause []string
 	var searchParams []interface{}
 
-	if searchQuery.IdentityNumber != "" {
+	if searchQuery.IdentityDetail.IdentityNumber > 0 {
 		whereClause = append(whereClause, fmt.Sprintf("m.patient_identity_number = $%d", len(searchParams)+1))
-		searchParams = append(searchParams, searchQuery.IdentityNumber)
+		searchParams = append(searchParams, searchQuery.IdentityDetail.IdentityNumber)
 	}
-	if searchQuery.CreatedById != "" {
+	if searchQuery.CreatedBy.UserId != "" {
 		whereClause = append(whereClause, fmt.Sprintf("m.created_by = $%d", len(searchParams)+1))
-		searchParams = append(searchParams, searchQuery.CreatedById)
+		searchParams = append(searchParams, searchQuery.CreatedBy.UserId)
 	}
-	if searchQuery.CreatedByNip != "" {
+	if searchQuery.CreatedBy.Nip != "" {
 		whereClause = append(whereClause, fmt.Sprintf("u.nip = $%d", len(searchParams)+1))
-		searchParams = append(searchParams, searchQuery.CreatedByNip)
+		searchParams = append(searchParams, searchQuery.CreatedBy.Nip)
 	}
 
 	if len(whereClause) > 0 {

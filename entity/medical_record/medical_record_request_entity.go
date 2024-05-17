@@ -10,7 +10,7 @@ type CreatePatientRequest struct {
 }
 
 type SearchPatientQuery struct {
-	IdentityNumber string
+	IdentityNumber int
 	Name           string
 	PhoneNumber    string
 	CreatedAt      string
@@ -24,11 +24,18 @@ type CreateMedicalRecordRequest struct {
 	Medications    string `json:"medications" validate:"required,min=1,max=2000"`
 }
 
+type IdentityDetails struct {
+	IdentityNumber int `json:"identityNumber"`
+}
+
+type CreatedBy struct {
+	UserId string `json:"userId"`
+	Nip    string `json:"nip"`
+}
 type SearchMedicalRecordQuery struct {
-	IdentityNumber string `query:"identityDetail.identityNumber"`
-	CreatedById    string `query:"createdBy.userId"`
-	CreatedByNip   string `query:"createdBy.nip"`
-	CreatedAt      string `query:"createdAt"`
-	Limit          int    `query:"limit"`
-	Offset         int    `query:"offset"`
+	IdentityDetail *IdentityDetails `query:"identityDetail"`
+	CreatedBy      *CreatedBy       `query:"createdBy"`
+	CreatedAt      string           `query:"createdAt"`
+	Limit          int              `query:"limit"`
+	Offset         int              `query:"offset"`
 }
