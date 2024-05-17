@@ -8,9 +8,8 @@ type UserRegisterRequest struct {
 }
 
 type NurseEditRequest struct {
-	Name                string `json:"name" validate:"required,min=5,max=50"`
-	Nip                 int    `json:"nip" validate:"required"`
-	IdentityCardScanImg string `json:"identityCardScanImg" validate:"required,validateUrl"`
+	Name string `json:"name" validate:"required,min=5,max=50"`
+	Nip  int    `json:"nip" validate:"required"`
 }
 
 type UserLoginRequest struct {
@@ -23,11 +22,11 @@ type NurseAccessRequest struct {
 }
 
 type UserGetRequest struct {
-	Id        string `json:"userId"`
-	Name      string `json:"name"`
-	Nip       string `json:"nip"`
-	Role      string `json:"role"`
-	Limit     int    `json:"limit"`
-	Offset    int    `json:"offset"`
-	CreatedAt string `json:"createdAt"`
+	Id        string `query:"userId"`
+	Name      string `query:"name"`
+	Nip       string `query:"nip"`
+	Role      string `query:"role"`
+	Limit     int    `query:"limit"`
+	Offset    int    `query:"offset"`
+	CreatedAt string `query:"createdAt"`
 }

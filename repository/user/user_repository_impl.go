@@ -46,8 +46,8 @@ func (repository *userRepositoryImpl) Login(ctx context.Context, user user_entit
 }
 
 func (repository *userRepositoryImpl) Edit(ctx context.Context, user user_entity.User) error {
-	query := "UPDATE users SET nip = $1, name = $2, identity_card_scan_img = $3 WHERE id = $4 AND role = 'nurse' RETURNING id"
-	if err := repository.DBpool.QueryRow(ctx, query, user.Nip, user.Name, user.IdentityCardScanImg, user.Id).Scan(&user.Id); err != nil {
+	query := "UPDATE users SET nip = $1, name = $2 WHERE id = $3 AND role = 'nurse' RETURNING id"
+	if err := repository.DBpool.QueryRow(ctx, query, user.Nip, user.Name, user.Id).Scan(&user.Id); err != nil {
 		return err
 	}
 

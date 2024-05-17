@@ -94,11 +94,10 @@ func (service *userServiceImpl) Edit(ctx *fiber.Ctx, req user_entity.NurseEditRe
 		return user_entity.UserResponse{}, exc.BadRequestException(fmt.Sprintf("Bad request: %s", err))
 	}
 	user := user_entity.User{
-		Id:                  ctx.Params("userId"),
-		Name:                req.Name,
-		Nip:                 strconv.Itoa(req.Nip),
-		Role:                "nurse",
-		IdentityCardScanImg: req.IdentityCardScanImg,
+		Id:   ctx.Params("userId"),
+		Name: req.Name,
+		Nip:  strconv.Itoa(req.Nip),
+		Role: "nurse",
 	}
 
 	if err := service.Validator.Var(user.Nip, "nipNurse"); err != nil {
