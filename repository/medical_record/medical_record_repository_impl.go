@@ -26,7 +26,7 @@ func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context
 
 	query := `INSERT INTO patients (identity_number, phone_number, name, gender, birth_date, identity_card_scan_img) 
 	VALUES ($1, $2, $3, $4, $5, $6) 
-	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at`
+	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') created_at`
 	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, patient.PhoneNumber, patient.Name, patient.Gender, patient.BirthDate, patient.IdentityCardScanImg).Scan(&patient.Id, &patient.CreatedAt); err != nil {
 		return medical_record_entity.Patient{}, err
 	}
@@ -35,7 +35,7 @@ func (repository *medicalRecordRepositoryImpl) CreatePatient(ctx context.Context
 }
 
 func (repository *medicalRecordRepositoryImpl) SearchPatient(ctx context.Context, searchQuery medical_record_entity.SearchPatientQuery) (*[]medical_record_entity.SearchPatientData, error) {
-	query := `SELECT identity_number, phone_number, name, to_char(birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') birth_date, gender, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at
+	query := `SELECT identity_number, phone_number, name, to_char(birth_date, 'YYYY-MM-DD"T"HH24:MI:SS.US') birth_date, gender, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') createdAt
 	FROM patients`
 
 	var whereClause []string
@@ -98,7 +98,7 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 	WHERE EXISTS (
 		SELECT 1 FROM patients WHERE identity_number = $5
 	)
-	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at;`
+	RETURNING id, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') created_at;`
 	if err := repository.DBpool.QueryRow(ctx, query, identityNumber, medical.Symptoms, medical.Medications, medical.CreatedBy, identityNumber).Scan(&medical.Id, &medical.CreateAt); err != nil {
 		return medical_record_entity.MedicalRecord{}, err
 	}
@@ -108,10 +108,10 @@ func (repository *medicalRecordRepositoryImpl) CreateMedicalRecord(ctx context.C
 
 func (repository *medicalRecordRepositoryImpl) SearchMedicalRecord(ctx context.Context, searchQuery medical_record_entity.SearchMedicalRecordQuery) (*[]medical_record_entity.SearchMedicalRecordData, error) {
 	query := `SELECT 
-	json_build_object('identityNumber', p.identity_number, 'phoneNumber', p.phone_number, 'name', p.name, 'birthDate', to_char(p.birth_date, 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'gender', p.gender, 'identityCardScanImg', p.identity_card_scan_img) identity_detail,
+	json_build_object('identityNumber', p.identity_number, 'phoneNumber', p.phone_number, 'name', p.name, 'birthDate', to_char(p.birth_date, 'YYYY-MM-DD"T"HH24:MI:SS.US'), 'gender', p.gender, 'identityCardScanImg', p.identity_card_scan_img) identity_detail,
 	m.symptoms,
 	m.medications,
-	to_char(m.created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') created_at,
+	to_char(m.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') createdAt,
 	json_build_object('nip', CAST(u.nip AS BIGINT), 'name', u.name, 'userId', u.id) created_by
 	FROM medical_records m
 		JOIN users u ON u.id = m.created_by

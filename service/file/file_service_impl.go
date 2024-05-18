@@ -22,13 +22,18 @@ func NewFileService() FileService {
 func (service *fileServiceImpl) Upload(ctx *fiber.Ctx) (file_entity.UploadImageResponse, error) {
 	file, err := ctx.FormFile("file")
 	if err != nil {
-		return file_entity.UploadImageResponse{}, err
+		return file_entity.UploadImageResponse{}, exc.BadRequestException("Failed to get File")
 	}
 	allowedTypes := []string{"image/jpeg", "image/jpg"}
 	if !slices.Contains(allowedTypes, file.Header.Get("Content-Type")) {
 		// Handle invalid file type
 		return file_entity.UploadImageResponse{}, exc.BadRequestException("Invalid File Type")
 	}
+
+	// sName := strings.ToLower(file.Filename)
+	// if !(strings.HasSuffix(sName, ".jpg") || strings.HasSuffix(sName, ".jpeg")) {
+	// 	return file_entity.UploadImageResponse{}, exc.BadRequestException("Invalid File Type")
+	// }
 
 	MIN_SIZE, MAX_SIZE := 10*1024, 2*1024*1024
 	if file.Size < int64(MIN_SIZE) || file.Size > int64(MAX_SIZE) {
