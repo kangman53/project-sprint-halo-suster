@@ -55,7 +55,7 @@ func (repository *userRepositoryImpl) Edit(ctx context.Context, user user_entity
 }
 
 func (repository *userRepositoryImpl) Search(ctx context.Context, searchQuery user_entity.UserGetRequest) (*[]user_entity.UserResponseData, error) {
-	query := `SELECT id, name, cast(nip as BIGINT) nip, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') createdAt FROM users WHERE is_deleted = false`
+	query := `SELECT id, name, cast(nip as BIGINT) nip, to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.US') createdAt FROM users WHERE is_deleted = false`
 	var whereClause []string
 	var searchParams []interface{}
 

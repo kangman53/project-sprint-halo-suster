@@ -14,7 +14,7 @@ type SearchPatientResponse struct {
 
 type SearchPatientData struct {
 	IdentityNumber int    `json:"identityNumber"`
-	PhoneNumber    string `json:"PhoneNumber"`
+	PhoneNumber    string `json:"phoneNumber"`
 	Name           string `json:"name"`
 	BirthDate      string `json:"birthDate"`
 	Gender         string `json:"gender"`

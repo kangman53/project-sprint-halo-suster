@@ -11,9 +11,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// 8 hours
-var expDuration = time.Now().Add(time.Hour * 8).Unix()
-
 type authServiceImpl struct {
 }
 
@@ -22,6 +19,8 @@ func NewAuthService() AuthService {
 }
 
 func (service *authServiceImpl) GenerateToken(ctx context.Context, userId string, role string) (string, error) {
+	// 8 hours
+	var expDuration = time.Now().Add(time.Hour * 8).Unix()
 	jwtconf := jwt.MapClaims{
 		"user_id": userId,
 		"exp":     expDuration,
