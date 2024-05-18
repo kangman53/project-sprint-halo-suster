@@ -91,7 +91,7 @@ func (service *medicalRecordServiceImpl) CreateMedicalRecord(ctx *fiber.Ctx, req
 	medicalRecordCreated, err := service.MedicalRecordRepository.CreateMedicalRecord(ctx.UserContext(), medicalRecord)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
-			return medical_record_entity.CreateMedicalRecordResponse{}, exc.BadRequestException("identityNumber is not exist")
+			return medical_record_entity.CreateMedicalRecordResponse{}, exc.NotFoundException("identityNumber is not exist")
 		}
 		return medical_record_entity.CreateMedicalRecordResponse{}, err
 	}
