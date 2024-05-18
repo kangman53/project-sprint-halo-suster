@@ -3,7 +3,7 @@ package medical_record_entity
 type Patient struct {
 	Id                  string `json:"id,omitempty"`
 	IdentityNumber      int    `json:"identityNumber,omitempty"`
-	PhoneNumber         string `json:"PhoneNumber,omitempty"`
+	PhoneNumber         string `json:"phoneNumber,omitempty"`
 	Name                string `json:"name,omitempty"`
 	BirthDate           string `json:"birthDate,omitempty"`
 	Gender              string `json:"gender,omitempty"`
